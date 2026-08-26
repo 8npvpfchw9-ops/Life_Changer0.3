@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<title>OS</title>
+<meta name="description" content="A one-page operating system for one season at a time." />
+
+<!-- PWA / iPhone home screen -->
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#E5E3D8" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="OS" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div class="mode-band" id="modeBand" data-mode="green"></div>
+
+<!-- ============ TODAY ============ -->
+<main class="screen active" id="screen-today">
+  <div class="topbar">
+    <div>
+      <div class="greeting" id="greeting">Morning.</div>
+      <div class="subline" id="todaySubline">Loading…</div>
+    </div>
+    <button class="mode-pill" id="modePillBtn" data-mode="green"><span class="dot"></span><span id="modePillText">GREEN</span></button>
+  </div>
+
+  <div class="section" id="overloadBanner" style="display:none;">
+    <div class="card" style="border-color:var(--red); background:var(--red-soft);">
+      <div style="font-weight:700; font-size:13.5px; color:var(--red);" id="overloadTitle">Overloaded</div>
+      <div class="muted mt8" id="overloadBody" style="color:var(--ink);"></div>
+      <button class="btn small mt12" onclick="go('review')">Go trim something</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><h2>Today's Top 3</h2><span class="hint">only three</span></div>
+    <div class="card" id="top3Card"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><h2>Season</h2></div>
+    <div class="card">
+      <div class="card-row">
+        <div>
+          <div style="font-weight:600;" id="seasonName">Normal semester</div>
+          <div class="faint" id="seasonPriority">Current priority: —</div>
+        </div>
+        <button class="btn secondary small" onclick="go('more'); openMoreScreen('season')">Change</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><h2>Minimum viable day</h2><span class="hint">never zero</span></div>
+    <div class="card" id="mvdCard"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><h2>Wind-down</h2></div>
+    <div class="card">
+      <textarea id="windDownInput" rows="2" placeholder="What ends the day — e.g. phone in kitchen by 11, lights out by 11:30"></textarea>
+    </div>
+  </div>
+</main>
+
+<!-- ============ WEEK ============ -->
+<main class="screen" id="screen-week">
+  <div class="topbar">
+    <div><div class="greeting">Week</div><div class="subline">15–30 min, once a week</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><h2>Capacity check</h2><span class="hint">rough, not precise</span></div>
+    <div class="card">
+      <div class="field">
+        <label>Realistic flexible hours this week</label>
+        <input type="number" id="capHoursAvailable" min="0" placeholder="e.g. 10" />
+      </div>
+      <div class="faint">15–20% of a week is meant to stay unclaimed. Don't fill it.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><h2>Commitments this week</h2><span class="hint" id="capTotalHint"></span></div>
+    <div class="card" id="commitmentsCard"></div>
+    <button class="btn secondary block mt8" onclick="addCommitment()">+ Add commitment</button>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><h2>Plan the week</h2></div>
+    <div class="card">
+      <div class="field"><label>School</label><textarea id="weekSchool" rows="2"></textarea></div>
+      <div class="field"><label>Business</label><textarea id="weekBusiness" rows="2"></textarea></div>
+      <div class="field"><label>Training / recovery</label><textarea id="weekTraining" rows="2"></textarea></div>
+      <div class="field"><label>Scripture / temple</label><textarea id="weekSpiritual" rows="2"></textarea></div>
+      <div class="field"><label>Reading</label><textarea id="weekReading" rows="2"></textarea></div>
+      <div class="field"><label>Social life / recreation</label><textarea id="weekSocial" rows="2"></textarea></div>
+      <div class="field" style="margin-bottom:0;"><label>Buffer — left alone on purpose</label><textarea id="weekBuffer" rows="2"></textarea></div>
+    </div>
+  </div>
+</main>
+
+<!-- ============ DOMAINS ============ -->
+<main class="screen" id="screen-domains">
+  <div class="topbar"><div><div class="greeting">Domains</div><div class="subline">everything not in the current growth priority is maintenance — keep it running, not maximized</div></div></div>
+
+  <div class="chip-row" id="domainChips"></div>
+  <div id="domainBody"></div>
+</main>
+
+<!-- ============ REVIEW ============ -->
+<main class="screen" id="screen-review">
+  <div class="topbar"><div><div class="greeting">Review</div><div class="subline">what to remove, not just what to add</div></div></div>
+
+  <div class="chip-row">
+    <button class="chip active" data-rt="daily" onclick="setReviewTab('daily')">Daily · 5 min</button>
+    <button class="chip" data-rt="weekly" onclick="setReviewTab('weekly')">Weekly · 20 min</button>
+    <button class="chip" data-rt="monthly" onclick="setReviewTab('monthly')">Monthly · 45–60 min</button>
+    <button class="chip" data-rt="quarterly" onclick="setReviewTab('quarterly')">Quarterly · 2 hr</button>
+  </div>
+  <div id="reviewBody"></div>
+</main>
+
+<!-- ============ MORE (Season / Goals / Not Now / Settings) ============ -->
+<main class="screen" id="screen-more">
+  <div class="topbar"><div><div class="greeting">More</div></div></div>
+  <div class="more-grid" id="moreGrid">
+    <button class="more-item" onclick="openMoreScreen('season')"><div class="display">Season</div><div class="hint">mode &amp; season</div></button>
+    <button class="more-item" onclick="openMoreScreen('goals')"><div class="display">Goals</div><div class="hint">active priorities</div></button>
+    <button class="more-item" onclick="openMoreScreen('notnow')"><div class="display">Not Now</div><div class="hint">parked, not forgotten</div></button>
+    <button class="more-item" onclick="openMoreScreen('settings')"><div class="display">Settings</div><div class="hint">name, reset</div></button>
+  </div>
+  <div id="moreBody"></div>
+</main>
+
+<!-- ============ GOAL INTAKE MODAL (the decision engine) ============ -->
+<div class="modal-backdrop" id="goalModalBackdrop">
+  <div class="modal">
+    <div class="modal-head"><h3>New commitment</h3><button class="btn ghost" onclick="closeGoalModal()">Close</button></div>
+    <div class="field"><label>What is it?</label><input id="gTitle" type="text" placeholder="e.g. start a second business" /></div>
+
+    <div class="modal-q">Why do you want this?</div>
+    <textarea id="gWhy" rows="2"></textarea>
+
+    <div class="modal-q">Does it support a lifelong value, or is it just exciting right now?</div>
+    <select id="gSupports"><option value="value">Supports a lifelong value</option><option value="exciting">Mostly just exciting right now</option></select>
+
+    <div class="modal-q">Is it aligned with your current season?</div>
+    <select id="gAligned"><option value="yes">Yes</option><option value="no">No</option></select>
+
+    <div class="row mt8">
+      <div class="field"><label>Hours / week it needs</label><input id="gHours" type="number" min="0" /></div>
+      <div class="field"><label>Recovery it needs</label><select id="gRecovery"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></div>
+    </div>
+
+    <div class="modal-q">What would you have to reduce or remove to make room?</div>
+    <textarea id="gRemove" rows="2"></textarea>
+
+    <div class="modal-q">Can it wait?</div>
+    <select id="gWait"><option value="yes">Yes, it can wait</option><option value="no">No, it's time-sensitive</option></select>
+
+    <button class="btn block mt16" onclick="evaluateGoal()">Run it through</button>
+    <div id="goalVerdict"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ============ TAB BAR ============ -->
+<nav class="tabbar">
+  <button class="tab active" data-tab="today" onclick="go('today')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+    Today
+  </button>
+  <button class="tab" data-tab="week" onclick="go('week')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="1"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+    Week
+  </button>
+  <button class="tab" data-tab="domains" onclick="go('domains')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>
+    Domains
+  </button>
+  <button class="tab" data-tab="review" onclick="go('review')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4v6h6M20 20v-6h-6"/><path d="M5.5 15a7 7 0 0 0 12.6 2.1M18.5 9A7 7 0 0 0 5.9 6.9"/></svg>
+    Review
+  </button>
+  <button class="tab" data-tab="more" onclick="go('more')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+    More
+  </button>
+</nav>
+
+<script src="app.js"></script>
+</body>
+</html>
